@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>车辆智能分析系统</title>
+    <style>
+        div#single-keyboard-box, div#mixed-keyboard-box {
+            height: 40%;
+            width: 100%; 
+            position: absolute;
+            bottom: 0;      
+        }    
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- built files will be auto injected --> 
+    <div id="mixed-keyboard-box">
+      <mixed-keyboard :args="args" :callbacks="callbacks"/>
+  </div>   
+  </body>
+</html>
+<script>
+    var number = "";
+
+    function native_callback_ontextkey(text){
+        number += text;
+        console.log("当前车牌[KEY]：" + number);
+        _updateKeyboard();
+    }
+
+    function native_callback_ondelkey(){
+        console.log("当前车牌[DEL]：" + number);
+        _updateKeyboard();
+    }
+
+    function native_callback_onokkey(){
+        console.log("当前车牌[OK]");
+    }
+
+    function native_callback_completed(number, isAutoCompleted){
+        console.log("当前车牌[完成]：" + number + ", 自动完成:" + isAutoCompleted);
+        document.getElementsByTagName("input")[0].value = number;
+        sessionStorage.setItem('vpl_number', number);
+    }
+
+    function native_callback_changed(isCompleted,number){
+        console.log("当前车牌[变更]：" + isCompleted + ", 已完成:" + isCompleted);
+        document.getElementsByTagName("input")[0].value = number;
+        sessionStorage.setItem('vpl_number', number);        
+    }
+
+    function native_callback_show_message(message){
+        console.log(message);
+    }
+
+    function _updateKeyboard(){
+        // native_update_keyboard(presetNumber, keyboardType, provinceName, numberType, inputIndex)
+        native_update_keyboard(number, 0, "广东省", 5, -1);
+    }
+
+ //_updateKeyboard();
+</script>
