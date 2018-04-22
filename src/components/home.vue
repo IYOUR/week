@@ -1,6 +1,6 @@
 <template>
   <div class="wrap">
-    <van-nav-bar title="超级车辆智能分析系统"/>
+    <van-nav-bar class="nav" title="超级车辆智能分析系统"/>
     <van-field v-model="vpl_number" readonly="readonly" class="searchInput"  placeholder="输入车牌进行搜索查询">
       <van-button @click="query" slot="button" size="small" type="primary"><van-icon name="search" /> 查询</van-button>
       <!--<van-icon slot="icon" name="search" />-->
@@ -49,6 +49,7 @@ export default {
   },  
   mounted () {
     sessionStorage.setItem('vpl_number', '');
+    sessionStorage.setItem('car_img', '');
     document.getElementById('mixed-keyboard-box').style.display = 'block';
   },   
   methods: {
@@ -70,7 +71,7 @@ export default {
             }
             sessionStorage.setItem('vplData', JSON.stringify(res.data.data));
             sessionStorage.setItem('car_img', file.content);
-            sessionStorage.setItem('vpl_number', res.data.data[0]);
+            sessionStorage.setItem('vpl_number', res.data.data.vpl_type? res.data.data.vpl_type:'');
             this.$router.push({ name: 'detail'});  
           } else{
             Toast.fail('请求失败啦!');
@@ -78,9 +79,9 @@ export default {
       })       
     },
     query () { 
-      //let vpl_number = '京KS9537';
+      let vpl_number = '京KS9537';
       let white = ['陕A66TU5','粤BF49883','陕A570TQ','陕AW8D35'];
-      let vpl_number =  sessionStorage.getItem('vpl_number')
+      //let vpl_number =  sessionStorage.getItem('vpl_number')
         if(!vpl_number&&vpl_number==''){
           Toast.fail('输入车牌号噢!');
           return
@@ -121,6 +122,9 @@ export default {
 
 <style lang="less">
 .wrap{
+  .nav{
+    background: rgb(14,134,255);
+  }
   height: 100%;
   width: 100%;
   background: rgb(14,134,255);
@@ -132,7 +136,8 @@ export default {
       border-radius: 3px;
       color: #fff;
       letter-spacing: 15px;
-      padding-left: 15px 
+      padding-left: 15px;
+      border: 1px solid rgba(0,0,0,.1);
     }
     button{
       height: 40px;
@@ -140,6 +145,7 @@ export default {
       border-radius: 3px;   
       border: 0px;  
       letter-spacing: 1px; 
+      border: 1px solid rgba(0,0,0,.1);
     }
   }
   .upBtn_wrap{

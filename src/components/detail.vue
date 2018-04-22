@@ -1,6 +1,6 @@
 <template>
   <div class="detailWrap">
-    <van-nav-bar left-arrow :title="vpl_number" @click-left="onClickLeft"/>
+    <van-nav-bar class="nav" left-arrow :title="vpl_number" @click-left="onClickLeft"/>
     <van-tabs>
       <van-tab title="基本信息">
         <van-panel v-if="car_img" title="车辆图片">
@@ -15,16 +15,8 @@
         </van-panel>
       </van-tab>
       <van-tab title="热力图">
-          <baidu-map 
-          class="map" 
-          style="width:100%; height:90vh;"
-          :center=" {lng: 109.00, lat: 34.225}" 
-          :zoom="11"
-          :ak="'GAksItkSpA2HzIVHA0xAbLGVhdHXbKf9'"
-          >
-            <bml-heatmap :data="heatmapData" :max="100" :radius="20">
-            </bml-heatmap>
-          </baidu-map>
+
+          <div id="allmap" style="width:100%;height:500px"> </div>
       </van-tab>
       <van-tab title="用户画像">
         <van-panel>
@@ -42,11 +34,13 @@
 <script>
 import { Row, Col,NavBar,Tab,Tabs,Panel,Cell, CellGroup} from 'vant';
 import {BaiduMap,BmlHeatmap,BmMarker} from 'vue-baidu-map';
+import inMap from 'inmap';
+import {MP} from '../map.js';
 export default {
   name: 'detail',
   data () {
     return {
-      portalImg:[0,1,2]
+      heatmapData:[{lng: 109.00, lat: 34.225,count: 80}]
     }
   },
   computed: {
@@ -57,20 +51,25 @@ export default {
       return sessionStorage.getItem('car_img');
     },
     vplData () {
-      return JSON.parse(sessionStorage.getItem('vplData'));
+      let data = JSON.parse(sessionStorage.getItem('vplData')),arr=[];
+      for(let key in data){
+        if(data[key].parking_name)
+          arr.push(data[key])
+      }
+      return arr
     },
     //热力图
-    heatmapData () {
-      let data = JSON.parse(sessionStorage.getItem('vplData')),arr=[];
-      for(let item in data){
-        arr.push({
-          lng: data[item].longitude, 
-          lat: data[item].latitude, 
-          count: data[item].parking_times
-        })
-      }
-      return arr     
-    },
+    // heatmapData () {
+    //   let data = JSON.parse(sessionStorage.getItem('vplData')),arr=[];
+    //   for(let item in data){
+    //     arr.push({
+    //       lng: data[item].longitude, 
+    //       lat: data[item].latitude, 
+    //       count: data[item].parking_times
+    //     })
+    //   }
+    //   return arr     
+    // },
     //画像
     portal () {
       let data = JSON.parse(sessionStorage.getItem('vplData')),arr=[];
@@ -85,18 +84,36 @@ export default {
   },
   mounted () {
     document.getElementById('mixed-keyboard-box').style.display = 'none';
-    // this.vpl_number = sessionStorage.getItem('vpl_number');
-    // this.car_img = sessionStorage.getItem('car_img');
-    // this.vplData = JSON.parse(sessionStorage.getItem('vplData')); 
-    // let data = JSON.parse(sessionStorage.getItem('vplData')),arr=[];
-    // for(let item in data){
-    //   arr.push({
-    //     lng: data[item].longitude, 
-    //     lat: data[item].latitude, 
-    //     count: data[item].parking_times
-    //   })
-    // }
-    // this.heatmap = arr;
+
+    this.$nextTick(function(){  
+                  var _this = this;  
+                  MP('GAksItkSpA2HzIVHA0xAbLGVhdHXbKf9').then(BMap => {  
+                              //在此调用api  
+                    var data=[{"lng":"116.395645","lat":"39.929986","count":6},{"lng":"121.487899","lat":"31.249162","count":6},];
+                    var inmap = new inMap.Map({
+                      id: "allmap",
+                      skin: "Blueness",
+                      center: [116.405335,39.91823],
+                      zoom: {
+                        value: 4,
+                        show: true,
+                        max: 16,
+                        min: 4
+                      }
+                    });
+                    var overlay = new inMap.HeatOverlay({
+                      style: {
+                        normal: {
+                          radius: 10, // 半径
+                          minScope: 0, // 最小区间,小于此区间的不显示
+                          maxScope: 1 // 最大区间,大于此区间的不显示
+                        },
+                      },
+                    });
+                    inmap.add(overlay);
+                    overlay.setPoints(data);
+    })})
+
   },  
   methods: {
     onClickLeft () {
@@ -133,6 +150,9 @@ export default {
   height: 100%;
   width: 100%;
   background: #eef0f4;
+  .nav{
+    background: rgb(14,134,255);
+  }
   .van-tabs__content{
     padding: 10px;
   }
