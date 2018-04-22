@@ -6,7 +6,7 @@
       <!--<van-icon slot="icon" name="search" />-->
     </van-field>
     <div class="upBtn_wrap">
-      <van-uploader :after-read="onRead" class="upload" accept="image/gif, image/jpeg" multiple>
+      <van-uploader :after-read="onRead" :max-size="3145728" @oversize="upOversize" class="upload" accept="image/gif, image/jpeg" multiple>
         <img src="../assets/img/button.png" />
       </van-uploader>         
     </div>
@@ -53,6 +53,9 @@ export default {
     document.getElementById('mixed-keyboard-box').style.display = 'block';
   },   
   methods: {
+    upOversize (file) {
+      Toast.fail('图片超过3MB啦!');
+    },
     onRead(file) {
       this.loadingShow = true;
       let formdata = new FormData();
@@ -79,9 +82,9 @@ export default {
       })       
     },
     query () { 
-      let vpl_number = '京KS9537';
+      //let vpl_number = '京KS9537';
       let white = ['陕A66TU5','粤BF49883','陕A570TQ','陕AW8D35'];
-      //let vpl_number =  sessionStorage.getItem('vpl_number')
+      let vpl_number =  sessionStorage.getItem('vpl_number')
         if(!vpl_number&&vpl_number==''){
           Toast.fail('输入车牌号噢!');
           return
@@ -156,7 +159,7 @@ export default {
     align-items: center;
     .upload{
       width: 50%;
-      margin-top: 50px;
+      margin-top: 5%;
       img{
         width: 100%;
       }

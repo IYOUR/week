@@ -15,15 +15,25 @@
         </van-panel>
       </van-tab>
       <van-tab title="热力图">
-
-          <div id="allmap" style="width:100%;height:500px"> </div>
+          <baidu-map 
+          class="map" 
+          style="width:100%; height:85vh;"
+          :center="'西安市'"
+          :zoom="11"
+          :scroll-wheel-zoom="true"
+          :ak="'GAksItkSpA2HzIVHA0xAbLGVhdHXbKf9'"
+          >
+            <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
+            <bml-heatmap :data="heatmapData" :max="5" :radius="20">
+            </bml-heatmap>
+          </baidu-map>
       </van-tab>
       <van-tab title="用户画像">
         <van-panel>
           <div style="height:100px;line-height:100px;text-align:center;">
             <p style="font-size: 20px;">{{portal.parking_type_name}}</p>
           </div>
-          <img style="width:100%;height:auto;" :src="'../../../static/img/'+portal.parking_type+'.png'"/>
+          <img style="width:100%;height:auto;padding-bottom: 100px" :src="'../../../static/img/'+portal.parking_type_name+'.png'"/>
           
         </van-panel>
       </van-tab>            
@@ -33,14 +43,14 @@
 
 <script>
 import { Row, Col,NavBar,Tab,Tabs,Panel,Cell, CellGroup} from 'vant';
-import {BaiduMap,BmlHeatmap,BmMarker} from 'vue-baidu-map';
-import inMap from 'inmap';
-import {MP} from '../map.js';
+import {BaiduMap,BmlHeatmap,BmMarker,BmNavigation} from 'vue-baidu-map';
 export default {
   name: 'detail',
   data () {
     return {
-      heatmapData:[{lng: 109.00, lat: 34.225,count: 80}]
+    //   heatmapData:[{lng: 116.418261, lat: 39.921984, count: 10},
+    //     {lng: 116.423332, lat: 39.916532, count: 31},
+    //     {lng: 116.419787, lat: 39.930658, count: 45}]
     }
   },
   computed: {
@@ -56,64 +66,46 @@ export default {
         if(data[key].parking_name)
           arr.push(data[key])
       }
+      if(arr.length>1){
+        arr.sort((a,b)=>{
+          return b.parking_times - a.parking_times
+        })
+      }
       return arr
     },
     //热力图
-    // heatmapData () {
-    //   let data = JSON.parse(sessionStorage.getItem('vplData')),arr=[];
-    //   for(let item in data){
-    //     arr.push({
-    //       lng: data[item].longitude, 
-    //       lat: data[item].latitude, 
-    //       count: data[item].parking_times
-    //     })
-    //   }
-    //   return arr     
-    // },
+    heatmapData () {
+      let data = JSON.parse(sessionStorage.getItem('vplData')),arr=[];
+      for(let item in data){
+        arr.push({
+          lng: data[item].longitude, 
+          lat: data[item].latitude, 
+          count: data[item].parking_times
+        })
+      }
+      return arr     
+    },
     //画像
     portal () {
       let data = JSON.parse(sessionStorage.getItem('vplData')),arr=[];
       for(let item in data){
         arr.push(data[item])
       }
-      arr.sort((a,b)=>{
-        return a.parking_times - b.parking_times
-      })
-      return arr[arr.length-1]
+      if(arr.length>1){
+        arr.sort((a,b)=>{
+          return a.parking_times - b.parking_times
+        })
+        return arr[arr.length-1]
+      } else{
+        return arr[arr.length-1]
+      }
+
     }
   },
   mounted () {
     document.getElementById('mixed-keyboard-box').style.display = 'none';
 
-    this.$nextTick(function(){  
-                  var _this = this;  
-                  MP('GAksItkSpA2HzIVHA0xAbLGVhdHXbKf9').then(BMap => {  
-                              //在此调用api  
-                    var data=[{"lng":"116.395645","lat":"39.929986","count":6},{"lng":"121.487899","lat":"31.249162","count":6},];
-                    var inmap = new inMap.Map({
-                      id: "allmap",
-                      skin: "Blueness",
-                      center: [116.405335,39.91823],
-                      zoom: {
-                        value: 4,
-                        show: true,
-                        max: 16,
-                        min: 4
-                      }
-                    });
-                    var overlay = new inMap.HeatOverlay({
-                      style: {
-                        normal: {
-                          radius: 10, // 半径
-                          minScope: 0, // 最小区间,小于此区间的不显示
-                          maxScope: 1 // 最大区间,大于此区间的不显示
-                        },
-                      },
-                    });
-                    inmap.add(overlay);
-                    overlay.setPoints(data);
-    })})
-
+ 
   },  
   methods: {
     onClickLeft () {
@@ -132,6 +124,7 @@ export default {
     BmlHeatmap: BmlHeatmap,
     BmMarker,BmMarker,
     BaiduMap: BaiduMap,
+    BmNavigation: BmNavigation,
   }  
 }
 </script>
