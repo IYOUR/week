@@ -88,17 +88,18 @@ export default {
     //画像
     portal () {
       let data = JSON.parse(sessionStorage.getItem('vplData')),arr=[];
-      for(let item in data){
-        arr.push(data[item])
+      for(let key in data){
+        if(data[key].parking_name)
+          arr.push(data[key])
       }
       if(arr.length>1){
         arr.sort((a,b)=>{
           return a.parking_times - b.parking_times
         })
         return arr[arr.length-1]
-      } else{
-        return arr[arr.length-1]
       }
+      return arr[arr.length-1]
+ 
 
     }
   },
