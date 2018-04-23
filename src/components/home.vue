@@ -6,8 +6,8 @@
       <!--<van-icon slot="icon" name="search" />-->
     </van-field>
     <div class="upBtn_wrap">
-      <van-uploader :after-read="onRead" :max-size="3145728" @oversize="upOversize" class="upload" accept="image/gif, image/jpeg" multiple>
-        <img src="../assets/img/button.png" />
+      <van-uploader :after-read="onRead" :max-size="8388608" @oversize="upOversize" class="upload" accept="image/gif, image/jpeg" multiple>
+        <img src="../../static/img/button.png" />
       </van-uploader>         
     </div>
  
@@ -30,8 +30,8 @@
 
 <script>
 import { Row, Col,NavBar  } from 'vant';
-import {Button,Uploader,Icon,Field,Toast,Popup,Loading} from 'vant';
-//import Keyboard from '@/components/MixedKeyboard'
+import {Button,Uploader,Icon,Field,Toast,Popup,Loading,Dialog} from 'vant';
+import lrz from 'lrz';
 export default {
   name: 'home',
   data () {
@@ -54,32 +54,45 @@ export default {
   },   
   methods: {
     upOversize (file) {
-      Toast.fail('图片超过3MB啦!');
+      Toast.fail('图片超过8MB啦!');
     },
     onRead(file) {
       this.loadingShow = true;
-      let formdata = new FormData();
-          formdata.append('car_image',file.file);
-          formdata.append('type','car_image');
-      let config = {  
-          headers: {'Content-Type': 'multipart/form-data'}
-      };  //添加请求头  
-      this.$http.post('ai/upload',formdata,config).then(res=>{ 
-          this.loadingShow = false;
-          if(res.status==200){
-            if(res.data.data.length==1||res.data.data.length==0){
-              Toast.fail(res.data.message);
-              this.fancheShow = true;
-              return
+      lrz(file.file).then(rst=> {
+        let fileData = new File([rst.file], "car_img.jpg");
+        console.log(rst)
+        console.log(fileData)
+        let formdata = new FormData();
+            formdata.append('car_image',fileData);
+            formdata.append('type','car_image');
+        let config = {  
+            headers: {'Content-Type': 'multipart/form-data'}
+        };  //添加请求头  
+        this.$http.post('ai/upload',formdata,config).then(res=>{ 
+            this.loadingShow = false;
+            if(res.status==200){
+              if(res.data.data.length==1||res.data.data.length==0){
+                Toast.fail(res.data.message);
+                this.fancheShow = true;
+                return
+              }
+              sessionStorage.setItem('vplData', JSON.stringify(res.data.data));
+              sessionStorage.setItem('car_img', file.content);
+              sessionStorage.setItem('vpl_number', res.data.data.vpl_type? res.data.data.vpl_type:'');
+              this.$router.push({ name: 'detail'});  
+            } else{
+              Toast.fail('请求失败啦!');
             }
-            sessionStorage.setItem('vplData', JSON.stringify(res.data.data));
-            sessionStorage.setItem('car_img', file.content);
-            sessionStorage.setItem('vpl_number', res.data.data.vpl_type? res.data.data.vpl_type:'');
-            this.$router.push({ name: 'detail'});  
-          } else{
-            Toast.fail('请求失败啦!');
-          }
-      })       
+        }).catch(err=> {
+          this.loadingShow = false;
+          this.fancheShow = true;
+          Toast.fail('上传失败啦!');
+        })    
+      }).catch(err=> {
+          console.log(err)
+          Toast.fail('图片压缩失败啦!');
+          return
+      })
     },
     query () { 
       //let vpl_number = '京KS9537';
@@ -117,7 +130,8 @@ export default {
     [Field.name]: Field, 
     [Toast.name]: Toast,
     [Popup.name]: Popup,  
-    [Loading.name]: Loading,    
+    [Loading.name]: Loading,  
+    [Dialog.name]: Dialog,   
     //keyboard:Keyboard,
   }  
 }
@@ -134,13 +148,13 @@ export default {
   .searchInput{
     background: rgb(14,134,255);
     input{
+      width: 98%;
       height: 40px;
       background: rgb(14,128,242);
       border-radius: 3px;
       color: #fff;
       letter-spacing: 15px;
       padding-left: 15px;
-      border: 1px solid rgba(0,0,0,.1);
     }
     button{
       height: 40px;
@@ -148,7 +162,6 @@ export default {
       border-radius: 3px;   
       border: 0px;  
       letter-spacing: 1px; 
-      border: 1px solid rgba(0,0,0,.1);
     }
   }
   .upBtn_wrap{

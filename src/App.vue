@@ -42,12 +42,12 @@ export default {
   display: none;
 }  
 input::-webkit-input-placeholder, textarea::-webkit-input-placeholder { 
-  color: rgba(255,255,255,0.4); 
+  color: rgba(255,255,255,0.6); 
   font-size: 13px;
   letter-spacing: 1px;
 } 
 input:-moz-placeholder, textarea:-moz-placeholder { 
-  color: rgba(255,255,255,0.4); 
+  color: rgba(255,255,255,0.6); 
   font-size: 13px;
   letter-spacing: 1px;
 } 
